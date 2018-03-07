@@ -1,0 +1,62 @@
+#!/bin/bash
+
+# pdcfw - manages PDC Linux Netfilter/IPtables firewall configuration
+
+# pdcfw - pdcfw main
+# Author: Ilari Korhonen, KTH Royal Institute of Technology
+#
+# Copyright (C) 2018 KTH Royal Institute of Technology. All rights reserved.
+# See LICENSE file for more information.
+
+
+# source in functions from distribution directory
+source $(dirname $0)/functions.sh
+
+# source in the main function
+if [ -x ${mainfunc} ]; then
+    source ${mainfunc}
+else
+    echo "pdcfw: file ${mainfunc} not present or executable, aborting!" > /dev/stderr
+    exit -1
+fi
+
+# process command line arguments and select action
+case "$1" in
+    show)
+	shift
+	show_action $@
+	;;
+
+    dry)
+	shift
+	printf "${prog}: executing dry run, resulting rule set:\n\n" > /dev/stderr
+
+	# execute the whole program with a dummy cmd
+	fwcmd="echo iptables" main
+
+	printf "\n${prog}: dry run complete - apply rule set by executing pdcfw apply!\n" > /dev/stderr
+	;;
+
+    apply)
+	shift
+	printf "${prog}: executing rule set starting from ${mainfunc}...\n"
+	main
+	printf "${prog}: rule set run complete - view results with pdcfw show running!\n" 
+	;;
+
+    flush)
+	shift
+	printf "${prog}: flushing IPTables ruleset...\n"
+	${fwcmd} --flush
+	;;
+
+    restore)
+	${restore} < ${IPTABLES_RULES}
+	;;
+	
+    *)
+	echo "${prog}: usage ${prog} {show|dry|apply|...}"
+	exit 1
+	;;
+esac
+
