@@ -84,6 +84,7 @@ function add_filter_rule()
     local icmptype=""
     local logprefix=""
     local rejectwith=""
+    local jump=""
     
     while [ $# -gt 0 ]; do
 	case "$1" in
@@ -144,7 +145,6 @@ function add_filter_rule()
 	    stateful)
 		shift
 		state="-m state --state NEW"
-		shift
 		;;
 
 	    state)
@@ -183,6 +183,12 @@ function add_filter_rule()
 		shift
 		;;
 
+	    jump)
+		shift
+		jump="-j $1"
+		shift
+		;;
+
 	    # at first unknown argument, stop parsing
 	    *)
 		break
@@ -191,7 +197,7 @@ function add_filter_rule()
     done
 
     # execute iptables add with parsed arguments and the rest
-    ${fwcmd} -A ${chain} ${iface} ${proto} ${icmptype} ${src} ${sport} ${dst} ${dport} ${state} ${limit} ${limitburst} ${logprefix} ${rejectwith} $@
+    ${fwcmd} -A ${chain} ${iface} ${proto} ${icmptype} ${src} ${sport} ${dst} ${dport} ${state} ${limit} ${limitburst} ${logprefix} ${rejectwith} ${jump} $@
 }
 
 
@@ -199,7 +205,7 @@ function add_filter_rule()
 
 function allow()
 {
-    add_filter_rule $@ -j ACCEPT
+    add_filter_rule $@ jump ACCEPT
 }
 
 
@@ -207,7 +213,7 @@ function allow()
 
 function drop()
 {
-    add_filter_rule $@ -j DROP
+    add_filter_rule $@ jump DROP
 }
 
 
@@ -215,7 +221,7 @@ function drop()
 
 function reject()
 {
-    add_filter_rule $@ -j REJECT
+    add_filter_rule $@ jump REJECT
 }
 
 
@@ -223,7 +229,7 @@ function reject()
 
 function log()
 {
-    add_filter_rule $@ -j LOG
+    add_filter_rule $@ jump LOG
 }
 
 
@@ -262,7 +268,7 @@ function allow_icmp_with_limits()
 
 	# for ICMP Echo Requests, we limit the number of packets
 	allow with ${chain} proto icmp icmp-type echo-request limit ${LIMIT_ICMP_ECHO}
-	log with ${chain} proto icmp icmp-type echo-request log-prefix "PDC FW: Excessive ICMP Echo:"
+	log with ${chain} proto icmp icmp-type echo-request log-prefix "DROP:ICMP:"
 	drop with ${chain} proto icmp icmp-type echo-request
 
 	# the rest of ICMP we allow blindly, for now
@@ -278,7 +284,7 @@ function drop_and_log_all()
     if [ $# -eq 1 ]; then
 	local chain=$1
 
-	log with ${chain} limit ${LOG_LIMIT} limit-burst ${LOG_LIMIT_BURST} log-prefix "PDC FW DROP (${chain}):"
+	log with ${chain} limit ${LOG_LIMIT} limit-burst ${LOG_LIMIT_BURST} log-prefix "DROP:${chain}:"
 	drop with ${chain}	
     fi
 }
