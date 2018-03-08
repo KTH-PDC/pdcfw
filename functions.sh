@@ -12,19 +12,16 @@
 fwcmd="/usr/sbin/iptables"
 save="/usr/sbin/iptables-save"
 restore="/usr/sbin/iptables-restore"
-
 mainfunc="$(dirname $0)/pdcfw-main.sh"
 prog="$(basename $0)"
 
-# default ruleset configuration file
-IPTABLES_RULES="/etc/sysconfig/iptables"
-
 # pdcfw defaults
-TRUSTED_IFACES="lo" # trusted interfaces (everything allowed)
-LIMIT_ICMP_ECHO="3/s" # limit for ICMP Echo Requests
-
+IPTABLES_RULES="/etc/sysconfig/iptables"            # default ruleset configuration file
+TRUSTED_IFACES="lo"                                 # trusted interfaces (everything allowed)
+LIMIT_ICMP_ECHO="3/s"                               # limit for ICMP Echo Requests
 LOG_LIMIT="3/s"
 LOG_LIMIT_BURST="10"
+
 
 # show_action - show command
 function show_action()
@@ -53,27 +50,192 @@ function show_action()
 }
 
 
-# save_and_flush - saves current in-memory firewall rules to disk and resets 
+# save - saves current in-memory firewall rules to a file
 
-function save_and_flush()
+function save()
 {
     # save existing in-memory ruleset to disk
     ${save} -t filter > ${IPTABLES_RULES}
+}
 
+
+# flush - flushes current in-memory ruleset
+
+function flush()
+{
     # flush in-memory ruleset
     ${fwcmd} --flush
 }
 
 
-# allow_trusted_if - accept all packets from/to trusted network interfaces
+# add_filter_rule - add a rule to IPTables filter table
+function add_filter_rule()
+{
+    local chain=""
+    local proto=""
+    local iface=""
+    local src=""
+    local sport=""
+    local dst=""
+    local dport=""
+    local state=""
+    local limit=""
+    local limitburst=""
+    local icmptype=""
+    local logprefix=""
+    local rejectwith=""
+    
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	    with)
+		shift
+		chain=$1
+		shift
+		;;
+	    
+	    via)
+		shift
+		if [ "$1" != "any" ]; then
+		    iface="-i $1"
+		fi
+		shift
+		;;
+	    
+	    proto)
+		shift
+		if [ "$1" != "any" ]; then
+		    proto="-p $1"
+		fi
+		shift
+		;;
+	    
+	    from)
+		shift
+		if [ "$1" != "any" ]; then
+		    src="-s $1"
+		fi
+		shift
+		;;
+	    
+	    sport)
+		shift
+		if [ "$1" != "any" ]; then
+		    sport="--sport $1"
+		fi
+		shift
+		;;
+	    
+	    to)
+		shift
+		if [ "$1" != "any" ]; then
+		    dst="-d $1"
+		fi
+		shift
+		;;
+	    
+	    dport)
+		shift
+		if [ "$1" != "any" ]; then
+		    dport="--dport $1"
+		fi
+		shift
+		;;
+	    
+	    stateful)
+		shift
+		state="-m state --state NEW"
+		shift
+		;;
 
-function allow_trusted_if()
+	    state)
+		shift
+		state="-m state --state $1"
+		shift
+		;;
+	    
+	    limit)
+		shift
+		limit="-m limit --limit $1"
+		shift
+		;;
+
+	    limit-burst)
+		shift
+		limitburst="--limit-burst $1"
+		shift
+		;;
+
+	    icmp-type)
+		shift
+		icmptype="--icmp-type $1"
+		shift
+		;;
+
+	    log-prefix)
+		shift
+		logprefix="--log-prefix $1"
+		shift
+		;;
+
+	    reject-with)
+		shift
+		rejectwith="--reject-with $1"
+		shift
+		;;
+
+	    # at first unknown argument, stop parsing
+	    *)
+		break
+		;;
+	esac
+    done
+
+    # execute iptables add with parsed arguments and the rest
+    ${fwcmd} -A ${chain} ${iface} ${proto} ${icmptype} ${src} ${sport} ${dst} ${dport} ${state} ${limit} ${limitburst} ${logprefix} ${rejectwith} $@
+}
+
+
+# allow - generic macro for a rule accepting packets
+
+function allow()
+{
+    add_filter_rule $@ -j ACCEPT
+}
+
+
+# drop - generic macro for dropping packets
+
+function drop()
+{
+    add_filter_rule $@ -j DROP
+}
+
+
+# reject - generic macro for rejecting packets
+
+function reject()
+{
+    add_filter_rule $@ -j REJECT
+}
+
+
+# log - generic macro for logging packets
+
+function log()
+{
+    add_filter_rule $@ -j LOG
+}
+
+
+# allow_trusted_interfaces - accept all packets from/to trusted network interfaces
+
+function allow_trusted_interfaces()
 {
     if [ $# -eq 1 ]; then	
 	local chain=$1
 	
 	for iface in ${TRUSTED_IFACES}; do
-	    ${fwcmd} -A ${chain} -i ${iface} -j ACCEPT
+	    allow with ${chain} via ${iface} from any to any
 	done
     fi
 }
@@ -86,7 +248,7 @@ function allow_established()
     if [ $# -eq 1 ]; then
 	local chain=$1
 
-	${fwcmd} -A ${chain} -m state --state RELATED,ESTABLISHED -j ACCEPT
+	allow with ${chain} state RELATED,ESTABLISHED
     fi
 }
 
@@ -99,89 +261,13 @@ function allow_icmp_with_limits()
 	local chain=$1
 
 	# for ICMP Echo Requests, we limit the number of packets
-	${fwcmd} -A ${chain} -p icmp --icmp-type echo-request -m limit --limit ${LIMIT_ICMP_ECHO} -j ACCEPT
-	${fwcmd} -A ${chain} -p icmp --icmp-type echo-request -j LOG --log-prefix "PDC FW: Excessive ICMP Echo:"
-	${fwcmd} -A ${chain} -p icmp --icmp-type echo-request -j DROP
+	allow with ${chain} proto icmp icmp-type echo-request limit ${LIMIT_ICMP_ECHO}
+	log with ${chain} proto icmp icmp-type echo-request log-prefix "PDC FW: Excessive ICMP Echo:"
+	drop with ${chain} proto icmp icmp-type echo-request
 
 	# the rest of ICMP we allow blindly, for now
-	${fwcmd} -A ${chain} -p icmp -j ACCEPT
+	allow with ${chain} proto icmp	
     fi
-}
-
-
-# allow - generic macro for allowing packets
-
-function allow()
-{
-    local chain=""
-    local proto=""
-    local iface=""
-    local src=""
-    local sport=""
-    local dst=""
-    local dport=""
-    local state=""
-    
-    while [ $# -gt 0 ]; do
-	case "$1" in
-	    with)
-		shift
-		chain=$1
-		shift
-		;;
-	    via)
-		shift
-		if [ "$1" != "any" ]; then
-		    iface="-i $1"
-		fi
-		shift
-		;;
-	    proto)
-		shift
-		if [ "$1" != "any" ]; then
-		    proto="-p $1"
-		fi
-		shift
-		;;
-	    from)
-		shift
-		if [ "$1" != "any" ]; then
-		    src="-s $1"
-		fi
-		shift
-		;;
-	    sport)
-		shift
-		if [ "$1" != "any" ]; then
-		    sport="--sport $1"
-		fi
-		shift
-		;;
-	    to)
-		shift
-		if [ "$1" != "any" ]; then
-		    dst="-d $1"
-		fi
-		shift
-		;;
-	    dport)
-		shift
-		if [ "$1" != "any" ]; then
-		    dport="--dport $1"
-		fi
-		shift
-		;;
-	    stateful)
-		shift
-		state="-m state --state NEW"
-		;;
-	    *)
-		break
-		;;
-	esac
-    done
-    
-    ${fwcmd} -A ${chain} ${iface} ${proto} ${src} ${sport} ${dst} ${dport} ${state} $@ -j ACCEPT
 }
 
 
@@ -192,8 +278,8 @@ function drop_and_log_all()
     if [ $# -eq 1 ]; then
 	local chain=$1
 
-	${fwcmd} -A ${chain} -j LOG -m limit --limit ${LOG_LIMIT} --limit-burst ${LOG_LIMIT_BURST} --log-prefix "PDC FW DROP (${chain}):"
-	${fwcmd} -A ${chain} -j DROP
+	log with ${chain} limit ${LOG_LIMIT} limit-burst ${LOG_LIMIT_BURST} log-prefix "PDC FW DROP (${chain}):"
+	drop with ${chain}	
     fi
 }
 
@@ -204,9 +290,9 @@ function reject_and_log_all()
 {
     if [ $# -eq 1 ]; then
 	local chain=$1
-	
-	${fwcmd} -A ${chain} -j LOG --log-prefix "PDC FW REJECT (${chain}):"
-	${fwcmd} -A ${chain} -j REJECT --reject-with icmp-host-prohibited
+
+	log with ${chain} log-prefix "PDC FW REJECT (${chain}):"
+	reject with ${chain} reject-with icmp-host-prohibited	
     fi
 }
 
