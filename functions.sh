@@ -197,7 +197,21 @@ function add_filter_rule()
     done
 
     # execute iptables add with parsed arguments and the rest
-    ${fwcmd} -A ${chain} ${iface} ${proto} ${icmptype} ${src} ${sport} ${dst} ${dport} ${state} ${limit} ${limitburst} ${logprefix} ${rejectwith} ${jump} $@
+    ${fwcmd} -A ${chain} \
+	     ${iface} \
+	     ${proto} \
+	     ${icmptype} \
+	     ${src} \
+	     ${sport} \
+	     ${dst} \
+	     ${dport} \
+	     ${state} \
+	     ${limit} \
+	     ${limitburst} \
+	     ${logprefix} \
+	     ${rejectwith} \
+	     ${jump} \
+	     $@
 }
 
 
