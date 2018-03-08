@@ -8,14 +8,15 @@
 # Copyright (C) 2018 KTH Royal Institute of Technology. All rights reserved.
 # See LICENSE file for more information.
 
-# set defaults for executables
+# set defaults for executables and paths
 fwcmd="/usr/sbin/iptables"
 save="/usr/sbin/iptables-save"
 restore="/usr/sbin/iptables-restore"
-mainfunc="$(dirname $0)/pdcfw-main.sh"
+configfile="/etc/sysconfig/pdcfw"
 prog="$(basename $0)"
 
 # pdcfw defaults
+MAIN_FUNC="$(dirname $0)/pdcfw-main.sh"             # default main function
 IPTABLES_RULES="/etc/sysconfig/iptables"            # default ruleset configuration file
 TRUSTED_IFACES="lo"                                 # trusted interfaces (everything allowed)
 LIMIT_ICMP_ECHO="3/s"                               # limit for ICMP Echo Requests

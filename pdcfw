@@ -12,9 +12,14 @@
 # source in functions from distribution directory
 source $(dirname $0)/functions.sh
 
+# if we have a configuration file, source it in
+if [ -f ${configfile} ]; then
+    source ${configfile}
+fi
+
 # source in the main function
-if [ -x ${mainfunc} ]; then
-    source ${mainfunc}
+if [ -x ${MAIN_FUNC} ]; then
+    source ${MAIN_FUNC}
 else
     echo "pdcfw: file ${mainfunc} not present or executable, aborting!" > /dev/stderr
     exit -1
