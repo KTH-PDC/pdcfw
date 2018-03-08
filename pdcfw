@@ -32,7 +32,7 @@ case "$1" in
 	printf "${prog}: executing dry run, resulting rule set:\n\n" > /dev/stderr
 
 	# execute the whole program with a dummy cmd
-	fwcmd="echo iptables" main
+	cat <(commit=true fwcmd="echo" main)
 
 	printf "\n${prog}: dry run complete - apply rule set by executing pdcfw apply!\n" > /dev/stderr
 	;;
@@ -43,9 +43,9 @@ case "$1" in
 	save
 	printf "${prog}: flushing in-memory firewall rule set...\n"
 	flush
-	printf "${prog}: executing rule set starting from ${mainfunc}...\n"
-	main
-	printf "${prog}: rule set run complete - view results with pdcfw show running!\n" 
+	printf "${prog}: executing rule set build starting from ${mainfunc}...\n"
+	${restore} <(commit=true fwcmd="echo" main)
+	printf "${prog}: rule set commit complete - view results with pdcfw show running!\n" 
 	;;
 
     flush)
@@ -63,4 +63,3 @@ case "$1" in
 	exit 1
 	;;
 esac
-

@@ -4,6 +4,10 @@ function main()
 {
     # table: filter (packet filtering, default)
     # rule chains: INPUT, OUTPUT, FORWARD
+
+    if [ ${commit} == "true" ]; then
+	${fwcmd} "*filter"
+    fi
     
     # rule chain: INPUT
     # description: incoming, packets destined to this host
@@ -16,11 +20,13 @@ function main()
     allow_established INPUT
     allow_icmp_with_limits INPUT
 
-    # allow SSH connections
-    allow with INPUT proto tcp from any to $(hostname),localhost dport 22 stateful
+    for myaddr in $(hostname) localhost; do
+	# allow SSH connections
+	allow with INPUT proto tcp from any to ${myaddr} dport 22 stateful
 
-    # allow AFS cache manager callback in
-    allow with INPUT proto udp from any to $(hostname),localhost dport 7001
+	# allow AFS cache manager callback in
+	allow with INPUT proto udp from any to ${myaddr} dport 7001
+    done
 
     # drop the rest
     drop_and_log_all INPUT
@@ -41,4 +47,8 @@ function main()
 
     # we drop and log all packets (no routing!)
     drop_and_log_all FORWARD
+
+    if [ ${commit} == "true" ]; then
+	${fwcmd} "COMMIT"
+    fi
 }
