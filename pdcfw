@@ -39,6 +39,10 @@ case "$1" in
 
     apply)
 	shift
+	printf "${prog}: saving in-memory firewall rule set to ${IPTABLES_RULES}...\n"
+	save
+	printf "${prog}: flushing in-memory firewall rule set...\n"
+	flush
 	printf "${prog}: executing rule set starting from ${mainfunc}...\n"
 	main
 	printf "${prog}: rule set run complete - view results with pdcfw show running!\n" 
