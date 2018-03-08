@@ -208,9 +208,9 @@ function add_filter_rule()
 	     ${state} \
 	     ${limit} \
 	     ${limitburst} \
-	     ${logprefix} \
 	     ${rejectwith} \
 	     ${jump} \
+	     ${logprefix} \
 	     $@
 }
 
@@ -311,8 +311,8 @@ function reject_and_log_all()
     if [ $# -eq 1 ]; then
 	local chain=$1
 
-	log with ${chain} log-prefix "PDC FW REJECT (${chain}):"
-	reject with ${chain} reject-with icmp-host-prohibited	
+	log with ${chain} limit ${LOG_LIMIT} limit-burst ${LOG_LIMIT_BURST} log-prefix "REJECT:${chain}"
+	reject with ${chain} reject-with icmp-host-prohibited
     fi
 }
 
