@@ -16,7 +16,8 @@ configfile="/etc/sysconfig/pdcfw"
 prog="$(basename $0)"
 
 # pdcfw defaults
-MAIN_FUNC="$(dirname $0)/pdcfw-main.sh"             # default main function
+CONFIGDIR="$(dirname $0)"
+MAIN_FUNC="${CONFIGDIR}/pdcfw-main.sh"                # default main function
 IPTABLES_RULES="/etc/sysconfig/iptables"            # default ruleset configuration file
 TRUSTED_IFACES="lo"                                 # trusted interfaces (everything allowed)
 LIMIT_ICMP_ECHO="3/s"                               # throttling limit for ICMP Echo Requests

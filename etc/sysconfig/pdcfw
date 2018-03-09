@@ -1,7 +1,10 @@
 # Configuration file for pdcfw (IPTables firewall manager at PDC)
 
+# directory for config files
+CONFIGDIR="/etc/pdcfw"
+
 # default main function
-MAIN_FUNC="$(dirname $0)/pdcfw-main.sh"
+MAIN_FUNC="${CONFIGDIR}/pdcfw-main.sh"
 
 # default ruleset configuration file
 IPTABLES_RULES="/etc/sysconfig/iptables"
