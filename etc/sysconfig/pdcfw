@@ -1,0 +1,22 @@
+# Configuration file for pdcfw (IPTables firewall manager at PDC)
+
+# default main function
+MAIN_FUNC="$(dirname $0)/pdcfw-main.sh"
+
+# default ruleset configuration file
+IPTABLES_RULES="/etc/sysconfig/iptables"
+
+# trusted interfaces (everything allowed)
+TRUSTED_IFACES="lo"
+
+# throttling limit for ICMP Echo Requests
+LIMIT_ICMP_ECHO="3/s"
+
+# burst limit for ICMP Echo Requests
+LIMIT_ICMP_ECHO_BURST="10"
+
+# throttling limit for logging
+LIMIT_LOG="3/s"
+
+# burst limit for logging
+LIMIT_LOG_BURST="10"
