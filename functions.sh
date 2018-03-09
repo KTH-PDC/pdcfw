@@ -332,3 +332,41 @@ function set_default_policy()
 	${fwcmd} -P ${chain} ${policy}
     fi
 }
+
+
+# select_table - select rule table for manipulation
+
+function select_table()
+{
+    if [ $# -eq 1 ]; then
+	local table=$1
+	echo "*${table}"
+    fi
+}
+
+
+# commit_ruleset - commit specified ruleset
+
+function commit_ruleset()
+{
+    echo "COMMIT"
+}
+
+
+# _main - built-in main function that wraps around main()
+
+function _main()
+{
+    # in commit mode specify table filter (default)
+    if [ ${commit} == "true" ]; then
+	select_table filter
+    fi
+
+    # execute firewall ruleset starting from main()
+    main
+
+    # in commit mode say commit
+    if [ ${commit} == "true" ]; then
+	commit_ruleset
+    fi
+}

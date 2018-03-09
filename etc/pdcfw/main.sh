@@ -9,11 +9,6 @@
 
 function main()
 {
-    # in commit mode specify table filter (default)
-    if [ ${commit} == "true" ]; then
-	${fwcmd} "*filter"
-    fi
-
     # table: filter (packet filtering, default)
     # rule chains: INPUT, OUTPUT, FORWARD
 
@@ -50,9 +45,4 @@ function main()
 
     # we drop and log all packets (no routing!)
     drop_and_log_all FORWARD
-
-    # in commit mode say commit
-    if [ ${commit} == "true" ]; then
-	${fwcmd} "COMMIT"
-    fi
 }

@@ -37,7 +37,7 @@ case "$1" in
 	printf "${prog}: executing dry run, resulting rule set:\n\n" > /dev/stderr
 
 	# execute the whole program with a dummy cmd
-	cat <(commit=true fwcmd="echo" main)
+	cat <(commit=true fwcmd="echo" _main)
 
 	printf "\n${prog}: dry run complete - apply rule set by executing pdcfw apply!\n" > /dev/stderr
 	;;
@@ -49,7 +49,7 @@ case "$1" in
 	printf "${prog}: flushing in-memory firewall rule set...\n"
 	flush
 	printf "${prog}: executing rule set build starting from ${mainfunc}...\n"
-	${restore} <(commit=true fwcmd="echo" main)
+	${restore} <(commit=true fwcmd="echo" _main)
 	printf "${prog}: rule set commit complete - view results with pdcfw show running!\n" 
 	;;
 

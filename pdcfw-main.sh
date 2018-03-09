@@ -5,10 +5,6 @@ function main()
     # table: filter (packet filtering, default)
     # rule chains: INPUT, OUTPUT, FORWARD
 
-    if [ ${commit} == "true" ]; then
-	${fwcmd} "*filter"
-    fi
-    
     # rule chain: INPUT
     # description: incoming, packets destined to this host
     
@@ -47,8 +43,4 @@ function main()
 
     # we drop and log all packets (no routing!)
     drop_and_log_all FORWARD
-
-    if [ ${commit} == "true" ]; then
-	${fwcmd} "COMMIT"
-    fi
 }
