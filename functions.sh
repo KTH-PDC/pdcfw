@@ -19,9 +19,10 @@ prog="$(basename $0)"
 MAIN_FUNC="$(dirname $0)/pdcfw-main.sh"             # default main function
 IPTABLES_RULES="/etc/sysconfig/iptables"            # default ruleset configuration file
 TRUSTED_IFACES="lo"                                 # trusted interfaces (everything allowed)
-LIMIT_ICMP_ECHO="3/s"                               # limit for ICMP Echo Requests
-LOG_LIMIT="3/s"
-LOG_LIMIT_BURST="10"
+LIMIT_ICMP_ECHO="3/s"                               # throttling limit for ICMP Echo Requests
+LIMIT_ICMP_ECHO_BURST="10"                          # burst limit for ICMP Echo Requests
+LIMIT_LOG="3/s"                                     # throttling limit for logging
+LIMIT_LOG_BURST="10"                                # burst limit for logging
 
 
 # show_action - show command
@@ -299,7 +300,7 @@ function drop_and_log_all()
     if [ $# -eq 1 ]; then
 	local chain=$1
 
-	log with ${chain} limit ${LOG_LIMIT} limit-burst ${LOG_LIMIT_BURST} log-prefix "DROP:${chain}:"
+	log with ${chain} limit ${LIMIT_LOG} limit-burst ${LIMIT_LOG_BURST} log-prefix "DROP:${chain}:"
 	drop with ${chain}	
     fi
 }
@@ -312,7 +313,7 @@ function reject_and_log_all()
     if [ $# -eq 1 ]; then
 	local chain=$1
 
-	log with ${chain} limit ${LOG_LIMIT} limit-burst ${LOG_LIMIT_BURST} log-prefix "REJECT:${chain}"
+	log with ${chain} limit ${LIMIT_LOG} limit-burst ${LIMIT_LOG_BURST} log-prefix "REJECT:${chain}"
 	reject with ${chain} reject-with icmp-host-prohibited
     fi
 }
