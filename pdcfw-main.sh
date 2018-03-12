@@ -1,3 +1,11 @@
+# pdcfw - manages PDC Linux Netfilter/IPtables firewall configuration
+
+# pdcfw-main.sh - pdcfw test main routine
+# Author: Ilari Korhonen, KTH Royal Institute of Technology
+#
+# Copyright (C) 2018 KTH Royal Institute of Technology. All rights reserved.
+# See LICENSE file for more information.
+
 #!/bin/bash
 
 function main()
@@ -15,13 +23,8 @@ function main()
     allow_established INPUT
     allow_icmp_with_limits INPUT
 
-    for myaddr in $(hostname) localhost; do
-	# allow SSH connections
-	allow with INPUT proto tcp from any to ${myaddr} dport 22 stateful
-
-	# allow AFS cache manager callback in
-	allow with INPUT proto udp from any to ${myaddr} dport 7001
-    done
+    # allow SSH connections
+    allow with INPUT proto tcp from any to $(hostname) dport 22 stateful
 
     # drop the rest
     drop_and_log_all INPUT
