@@ -7,10 +7,9 @@ function main()
 
     # rule chain: INPUT
     # description: incoming, packets destined to this host
-    
     # default policy: ACCEPT
     set_default_policy INPUT ACCEPT
-    
+
     # allow all from trusted interfaces, established connections, icmp w/ limits
     allow_trusted_interfaces INPUT
     allow_established INPUT
@@ -27,17 +26,13 @@ function main()
     # drop the rest
     drop_and_log_all INPUT
 
-
     # rule chain: OUTPUT
     # description: outgoing, packets generated on this host
-
     # default policy: ACCEPT
     set_default_policy OUTPUT ACCEPT
 
-
     # rule chain: FORWARD
     # description: routing, packets destined to be routed
-
     # default policy: ACCEPT
     set_default_policy FORWARD ACCEPT
 
