@@ -21,7 +21,7 @@ fi
 if [ -x ${MAIN_FUNC} ]; then
     source ${MAIN_FUNC}
 else
-    echo "pdcfw: file ${mainfunc} not present or executable, aborting!" > /dev/stderr
+    echo "pdcfw: file ${MAIN_FUNC} not present or executable, aborting!" > /dev/stderr
     exit -1
 fi
 
