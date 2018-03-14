@@ -8,7 +8,7 @@
 
 Summary: pdcfw IPTables/netfilter firewall manager
 Name: pdcfw
-Version: 0.1.0
+Version: 0.1.1
 Release: 1
 License: BSD
 Group: Applications/System
