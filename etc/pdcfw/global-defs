@@ -1,0 +1,9 @@
+# pdcfw - manages PDC Linux Netfilter/IPtables firewall configuration
+
+# global-defs - pdcfw global definitions
+# Author: Ilari Korhonen, KTH Royal Institute of Technology
+#
+# Copyright (C) 2018 KTH Royal Institute of Technology. All rights reserved.
+# See LICENSE file for more information.
+
+

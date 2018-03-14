@@ -9,7 +9,7 @@
 #!/bin/bash
 
 # include global definitions
-source ${CONFIGDIR}/defs
+source ${CONFIGDIR}/global-defs
 
 # include local rules for INPUT,OUTPUT,FORWARD chains
 source ${CONFIGDIR}/local-input.sh
