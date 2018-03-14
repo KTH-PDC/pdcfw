@@ -9,7 +9,7 @@
 Summary: pdcfw IPTables/netfilter firewall manager
 Name: pdcfw
 Version: 0.1.1
-Release: 1
+Release: 2
 License: BSD
 Group: Applications/System
 %undefine _disable_source_fetch
@@ -38,6 +38,7 @@ mkdir -p %{buildroot}/opt/pdcfw/rsyslog.d
 cp %{name}-%{version}/LICENSE %{buildroot}/opt/pdcfw
 cp %{name}-%{version}/pdcfw %{buildroot}/opt/pdcfw
 cp %{name}-%{version}/functions.sh %{buildroot}/opt/pdcfw
+cp %{name}-%{version}/etc/pdcfw/global-defs %{buildroot}/etc/pdcfw
 cp %{name}-%{version}/etc/pdcfw/local-forward.sh %{buildroot}/etc/pdcfw
 cp %{name}-%{version}/etc/pdcfw/local-input.sh %{buildroot}/etc/pdcfw
 cp %{name}-%{version}/etc/pdcfw/local-output.sh %{buildroot}/etc/pdcfw
@@ -50,10 +51,11 @@ cp %{name}-%{version}/etc/rsyslog.d/pdcfw.conf %{buildroot}/opt/pdcfw/rsyslog.d
 %attr(644,root,root) /opt/pdcfw/LICENSE
 %attr(644,root,root) /opt/pdcfw/functions.sh
 %attr(755,root,root) /opt/pdcfw/pdcfw
+%attr(644,root,root) /etc/pdcfw/global-defs
 %attr(644,root,root) /etc/pdcfw/local-forward.sh
 %attr(644,root,root) /etc/pdcfw/local-input.sh
 %attr(644,root,root) /etc/pdcfw/local-output.sh
-%attr(644,root,root) /etc/pdcfw/main.sh
+%attr(755,root,root) /etc/pdcfw/main.sh
 %attr(644,root,root) /etc/sysconfig/pdcfw
 %attr(644,root,root) /opt/pdcfw/rsyslog.d/pdcfw.conf
 
