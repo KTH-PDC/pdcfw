@@ -26,6 +26,34 @@ LIMIT_LOG="3/s"                                     # throttling limit for loggi
 LIMIT_LOG_BURST="10"                                # burst limit for logging
 
 
+# bold - set terminal font to bold with ANSI escape seq
+function boldfont() { printf "\e[1m"; }
+
+
+# ansireset - resets previous ANSI escape seq
+function ansireset() { printf "\e[0m"; }
+
+
+# success - display success message (w/ fancy ANSI control seqs on a terminal)
+function success()
+{
+    [ -t 1 ] && boldfont
+    printf " [ OK ] "
+    [ -t 1 ] && ansireset
+    printf "\n"
+}
+
+
+# failure - display failure message
+function failure()
+{
+    [ -t 1 ] && boldfont
+    printf " [ OK ] "
+    [ -t 1 ] && ansireset
+    printf "\n"
+}
+
+
 # show_action - show command
 function show_action()
 {
@@ -285,7 +313,7 @@ function allow_icmp_with_limits()
 
 	# for ICMP Echo Requests, we limit the number of packets
 	allow with ${chain} proto icmp icmp-type echo-request limit ${LIMIT_ICMP_ECHO}
-	log with ${chain} proto icmp icmp-type echo-request log-prefix "DROP:ICMP:"
+	log with ${chain} proto icmp icmp-type echo-request log-prefix "netfilter:DROP:ICMP:"
 	drop with ${chain} proto icmp icmp-type echo-request
 
 	# the rest of ICMP we allow blindly, for now
@@ -301,7 +329,7 @@ function drop_and_log_all()
     if [ $# -eq 1 ]; then
 	local chain=$1
 
-	log with ${chain} limit ${LIMIT_LOG} limit-burst ${LIMIT_LOG_BURST} log-prefix "DROP:${chain}:"
+	log with ${chain} limit ${LIMIT_LOG} limit-burst ${LIMIT_LOG_BURST} log-prefix "netfilter:DROP:${chain}:"
 	drop with ${chain}	
     fi
 }
@@ -314,7 +342,7 @@ function reject_and_log_all()
     if [ $# -eq 1 ]; then
 	local chain=$1
 
-	log with ${chain} limit ${LIMIT_LOG} limit-burst ${LIMIT_LOG_BURST} log-prefix "REJECT:${chain}"
+	log with ${chain} limit ${LIMIT_LOG} limit-burst ${LIMIT_LOG_BURST} log-prefix "netfilter:REJECT:${chain}"
 	reject with ${chain} reject-with icmp-host-prohibited
     fi
 }
