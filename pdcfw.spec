@@ -57,9 +57,6 @@ cp %{name}-%{version}/etc/rsyslog.d/pdcfw.conf %{buildroot}/opt/pdcfw/rsyslog.d
 %attr(644,root,root) /etc/sysconfig/pdcfw
 %attr(644,root,root) /opt/pdcfw/rsyslog.d/pdcfw.conf
 
-%post
-ln -s /opt/pdcfw/pdcfw /usr/bin/pdcfw
-
 %changelog
 * Wed Mar 14 2018 Ilari Korhonen <ilarik@kth.se>
 * first RPM release
