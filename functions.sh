@@ -8,6 +8,9 @@
 # Copyright (C) 2018 KTH Royal Institute of Technology. All rights reserved.
 # See LICENSE file for more information.
 
+# define version
+version="0.1.0"
+
 # set defaults for executables and paths
 fwcmd="/usr/sbin/iptables"
 save="/usr/sbin/iptables-save"
