@@ -25,6 +25,15 @@ else
     exit -1
 fi
 
+
+# helper function for saving ruleset
+function do_save()
+{
+    printf "${prog}: saving current in-memory firewall rule set to ${IPTABLES_RULES}..."
+    save
+    [ $? -eq 0 ] && success || failure
+}
+
 # process command line arguments and select action
 case "$1" in
     show)
@@ -44,15 +53,19 @@ case "$1" in
 
     apply)
 	shift
-	printf "${prog}: saving current in-memory firewall rule set to ${IPTABLES_RULES}..."
-	save
-	[ $? -eq 0 ] && success || failure
+	do_save
 	printf "${prog}: flushing current in-memory firewall rule set..."
 	flush
 	[ $? -eq 0 ] && success || failure
 	printf "${prog}: executing rule set build from ${MAIN_FUNC} and committing..."
 	${restore} <(commit=true fwcmd="echo" _main)
-	[ $? -eq 0 ] && success || failure
+
+	if [ $? -eq 0 ]; then
+	    success
+	    do_save
+	else
+	    failure
+	fi
 	;;
 
     flush)
