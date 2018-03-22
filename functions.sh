@@ -9,7 +9,7 @@
 # See LICENSE file for more information.
 
 # define version
-version="0.1.1"
+version="0.1.2"
 
 # set defaults for executables and paths
 fwcmd="/usr/sbin/iptables"
